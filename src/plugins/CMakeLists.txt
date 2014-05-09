@@ -138,6 +138,13 @@ if(ENABLE_SCRIPTS AND ENABLE_GUILE)
   endif()
 endif()
 
+if(ENABLE_SCRIPTS AND ENABLE_HASKELL)
+  find_package(GHC)
+  if(GHC_FOUND)
+    add_subdirectory( haskell )
+  endif()
+endif()
+
 if(ENABLE_TRIGGER)
   add_subdirectory( trigger )
 endif()
