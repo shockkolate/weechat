@@ -378,6 +378,21 @@ weechat_hs_command_cb (void *data, struct t_gui_buffer *buffer,
 }
 
 /*
+ * return hdata for haskell scripts
+ */
+
+struct t_hdata *
+weechat_hs_hdata_cb (void *data, const char *hdata_name)
+{
+    /* make C compiler happy */
+    (void) data;
+
+    return plugin_script_hdata_script (weechat_plugin,
+                                       &hs_scripts, &last_hs_script,
+                                       hdata_name);
+}
+
+/*
  * callback for buffer closed
  */
 
@@ -421,7 +436,9 @@ weechat_plugin_init (struct t_weechat_plugin *plugin, int argc, char *argv[])
     init.callback_command = &weechat_hs_command_cb;
 /*
     init.callback_completion = &weechat_hs_completion_cb;
+*/
     init.callback_hdata = &weechat_hs_hdata_cb;
+/*
     init.callback_infolist = &weechat_hs_infolist_cb;
     init.callback_signal_debug_dump = &weechat_hs_signal_debug_dump_cb;
     init.callback_signal_debug_libs = &weechat_hs_signal_debug_libs_cb;
