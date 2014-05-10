@@ -25,11 +25,16 @@ module WeechatHaskell where
 
 import Foreign.C.String (newCString)
 import Foreign.Ptr
-import qualified API
+import API
+
+close :: CloseCB
+close dat buffer = return weechat_RC_OK
 
 foreign export ccall test_buffer_new :: IO ()
 test_buffer_new :: IO ()
 test_buffer_new = do
     cs <- newCString "haskell"
-    API.buffer_new cs nullFunPtr nullPtr nullFunPtr nullPtr
+    fpClose <- fromCloseCB close
+    buf <- weechat_buffer_new cs nullFunPtr nullPtr fpClose nullPtr
+    --weechat_print buf cs
     return ()

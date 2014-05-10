@@ -23,7 +23,16 @@
 #define weechat_plugin weechat_haskell_plugin
 #define HASKELL_PLUGIN_NAME "haskell"
 
+extern void __stginit_WeechatHaskell ();
+
 extern struct t_weechat_plugin *weechat_haskell_plugin;
 //#define HASKELL_CURRENT_SCRIPT_NAME ((haskell_current_script) ? haskell_current_script->name : "-")
+
+extern int hs_quiet;
+extern struct t_plugin_script *hs_scripts;
+extern struct t_plugin_script *last_hs_script;
+extern struct t_plugin_script *hs_current_script;
+extern struct t_plugin_script *hs_registered_script;
+extern const char *hs_current_script_filename;
 
 #endif /* WEECHAT_HASKELL_H */

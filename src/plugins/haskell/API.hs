@@ -21,19 +21,26 @@
 
 {-# LANGUAGE ForeignFunctionInterface #-}
 
-module API
-( InputCB, CloseCB
-, buffer_new
-) where
+module API where
 
-import Foreign.C.Types (CInt)
+import Foreign.C.Types (CInt(..))
 import Foreign.C.String
 import Foreign.Ptr
 
-type GuiBuffer = ()
+type GuiBufferPtr = Ptr ()
 
-type InputCB = Ptr () -> Ptr GuiBuffer -> CString -> IO CInt
-type CloseCB = Ptr () -> Ptr GuiBuffer -> IO CInt
 
-foreign import ccall "weechat_hs_api_buffer_new" buffer_new
-    :: CString -> FunPtr InputCB -> Ptr () -> FunPtr CloseCB -> Ptr () -> IO (Ptr GuiBuffer)
+type InputCB = Ptr () -> GuiBufferPtr -> CString -> IO CInt
+foreign import ccall "wrapper" fromInputCB :: InputCB -> IO (FunPtr InputCB)
+
+type CloseCB = Ptr () -> GuiBufferPtr -> IO CInt
+foreign import ccall "wrapper" fromCloseCB :: CloseCB -> IO (FunPtr CloseCB)
+
+foreign import ccall "weechat_hs_api_RC_OK" weechat_RC_OK :: CInt
+foreign import ccall "weechat_hs_api_RC_OK_EAT" weechat_RC_OK_EAT :: CInt
+foreign import ccall "weechat_hs_api_RC_ERROR" weechat_RC_ERROR :: CInt
+
+foreign import ccall "weechat_hs_api_print"
+    weechat_print :: GuiBufferPtr -> CString -> IO ()
+foreign import ccall "weechat_hs_api_buffer_new"
+    weechat_buffer_new :: CString -> FunPtr InputCB -> Ptr () -> FunPtr CloseCB -> Ptr () -> IO GuiBufferPtr
