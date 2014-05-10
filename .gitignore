@@ -2,6 +2,7 @@
 
 *.a
 *.gmo
+*.hi
 *.html
 *.la
 *.lai
@@ -48,5 +49,7 @@ weechat-*.cygport
 
 *stamp
 stamp*
+
+src/plugins/haskell/*_stub.h
 
 src/gui/curses/weechat
