@@ -37,19 +37,19 @@
  */
 
 int
-weechat_hs_api_RC_OK ()
+weechat_hs_api_rc_ok ()
 {
     return WEECHAT_RC_OK;
 }
 
 int
-weechat_hs_api_RC_OK_EAT ()
+weechat_hs_api_rc_ok_eat ()
 {
     return WEECHAT_RC_OK_EAT;
 }
 
 int
-weechat_hs_api_RC_ERROR ()
+weechat_hs_api_rc_error ()
 {
     return WEECHAT_RC_ERROR;
 }

@@ -28,7 +28,7 @@ import Foreign.Ptr
 import API
 
 close :: CloseCB
-close dat buffer = return weechat_RC_OK
+close dat buffer = return weechat_rc_ok
 
 foreign export ccall test_buffer_new :: IO ()
 test_buffer_new :: IO ()
