@@ -1,5 +1,5 @@
 {-
- - WeechatHaskell.hs - haskell plugin for WeeChat
+ - API.hs - haskell foreign API functions
  -
  - Copyright (C) 2014 David Farrell (Shockk) <shokku.ra@gmail.com>
  -
@@ -21,15 +21,19 @@
 
 {-# LANGUAGE ForeignFunctionInterface #-}
 
-module WeechatHaskell where
+module API
+( InputCB, CloseCB
+, buffer_new
+) where
 
-import Foreign.C.String (newCString)
+import Foreign.C.Types (CInt)
+import Foreign.C.String
 import Foreign.Ptr
-import qualified API
 
-foreign export ccall test_buffer_new :: IO ()
-test_buffer_new :: IO ()
-test_buffer_new = do
-    cs <- newCString "haskell"
-    API.buffer_new cs nullFunPtr nullPtr nullFunPtr nullPtr
-    return ()
+type GuiBuffer = ()
+
+type InputCB = Ptr () -> Ptr GuiBuffer -> CString -> IO CInt
+type CloseCB = Ptr () -> Ptr GuiBuffer -> IO CInt
+
+foreign import ccall "weechat_hs_api_buffer_new" buffer_new
+    :: CString -> FunPtr InputCB -> Ptr () -> FunPtr CloseCB -> Ptr () -> IO (Ptr GuiBuffer)

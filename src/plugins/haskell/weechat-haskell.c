@@ -132,7 +132,6 @@ weechat_hs_command_cb (void *data, struct t_gui_buffer *buffer,
     if (argc == 1)
     {
         plugin_script_display_list (weechat_haskell_plugin, hs_scripts, NULL, 0);
-        weechat_printf (NULL, weechat_gettext ("five=%d"), five());
     }
 
     return WEECHAT_RC_OK;
@@ -150,6 +149,7 @@ weechat_plugin_init (struct t_weechat_plugin *plugin, int argc, char *argv[])
     weechat_plugin = plugin;
 
     hs_init (0, NULL);
+    test_buffer_new ();
 
     init.callback_command = &weechat_hs_command_cb;
 /*

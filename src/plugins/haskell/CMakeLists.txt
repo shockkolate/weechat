@@ -18,21 +18,33 @@
 #
 
 if(GHC_FOUND)
-  add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/WeechatHaskell.o
-                     COMMAND ${GHC_EXECUTABLE} -fPIC ${CMAKE_CURRENT_SOURCE_DIR}/WeechatHaskell.hs
-                     MAIN_DEPENDENCY WeechatHaskell.hs
+  add_custom_command(
+    OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/WeechatHaskell.o
+           ${CMAKE_CURRENT_SOURCE_DIR}/API.o
+    COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR} &&
+            ${GHC_EXECUTABLE} -fPIC WeechatHaskell.hs API.hs
+    MAIN_DEPENDENCY WeechatHaskell.hs
+    DEPENDS API.hs
   )
   add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/weechat-haskell.o
-                     COMMAND ${GHC_EXECUTABLE} -fPIC -c ${CMAKE_CURRENT_SOURCE_DIR}/weechat-haskell.c
-                                                     -o ${CMAKE_CURRENT_SOURCE_DIR}/weechat-haskell.o
-                     MAIN_DEPENDENCY weechat-haskell.c
+    COMMAND ${GHC_EXECUTABLE} -fPIC -c ${CMAKE_CURRENT_SOURCE_DIR}/weechat-haskell.c
+                                    -o ${CMAKE_CURRENT_SOURCE_DIR}/weechat-haskell.o
+    MAIN_DEPENDENCY weechat-haskell.c
+  )
+  add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/weechat-haskell-api.o
+    COMMAND ${GHC_EXECUTABLE} -fPIC -c ${CMAKE_CURRENT_SOURCE_DIR}/weechat-haskell-api.c
+                                    -o ${CMAKE_CURRENT_SOURCE_DIR}/weechat-haskell-api.o
+    MAIN_DEPENDENCY weechat-haskell-api.c
   )
 
-  add_library(haskell MODULE weechat-haskell.o WeechatHaskell.o
+  add_library(haskell MODULE weechat-haskell.o weechat-haskell-api.o WeechatHaskell.o API.o
               weechat-haskell.h HsFFI.h)
 
   add_custom_command(TARGET haskell PRE_BUILD
-    COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR} && ghc --make -dynamic -shared -fPIC WeechatHaskell.hs weechat-haskell.c -o haskell.so -optl-Wl,-soname,haskell.so
+    COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR} &&
+      ghc --make -dynamic -shared -fPIC
+      WeechatHaskell.hs weechat-haskell.c weechat-haskell-api.c $<TARGET_LINKER_FILE:weechat_plugins_scripts>
+      -o haskell.so -optl-Wl,-soname,haskell.so
   )
 
   set_target_properties(haskell PROPERTIES PREFIX "")
