@@ -18,16 +18,22 @@
 #
 
 if(GHC_FOUND)
-  execute_process(
-    COMMAND ${GHC_EXECUTABLE} -fPIC ${CMAKE_CURRENT_SOURCE_DIR}/WeechatHaskell.hs
+  add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/WeechatHaskell.o
+                     COMMAND ${GHC_EXECUTABLE} -fPIC ${CMAKE_CURRENT_SOURCE_DIR}/WeechatHaskell.hs
+                     MAIN_DEPENDENCY WeechatHaskell.hs
   )
-  execute_process(
-    COMMAND ${CMAKE_C_COMPILER} -fPIC -c ${CMAKE_CURRENT_SOURCE_DIR}/weechat-haskell.c
-                                      -o ${CMAKE_CURRENT_SOURCE_DIR}/weechat-haskell.o
+  add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/weechat-haskell.o
+                     COMMAND ${GHC_EXECUTABLE} -fPIC -c ${CMAKE_CURRENT_SOURCE_DIR}/weechat-haskell.c
+                                                     -o ${CMAKE_CURRENT_SOURCE_DIR}/weechat-haskell.o
+                     MAIN_DEPENDENCY weechat-haskell.c
   )
 
   add_library(haskell MODULE weechat-haskell.o WeechatHaskell.o
               weechat-haskell.h HsFFI.h)
+
+  add_custom_command(TARGET haskell PRE_BUILD
+    COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR} && ghc --make -dynamic -shared -fPIC WeechatHaskell.hs weechat-haskell.c -o haskell.so -optl-Wl,-soname,haskell.so
+  )
 
   set_target_properties(haskell PROPERTIES PREFIX "")
   set_target_properties(haskell PROPERTIES LINKER_LANGUAGE C)

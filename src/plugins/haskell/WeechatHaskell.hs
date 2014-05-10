@@ -23,6 +23,8 @@
 
 module WeechatHaskell where
 
-foreign export ccall five :: Int
-five :: Int
-five = 5
+import Foreign.C.Types
+
+foreign export ccall five :: CInt
+five :: CInt
+five = 5 + 2

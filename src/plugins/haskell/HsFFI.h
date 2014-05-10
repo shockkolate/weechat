@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+typedef int32_t HsInt32;
+
 typedef uint32_t HsChar;
 typedef signed int HsInt;
 typedef unsigned int HsWord;
