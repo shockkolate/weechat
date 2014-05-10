@@ -393,6 +393,30 @@ weechat_hs_hdata_cb (void *data, const char *hdata_name)
 }
 
 /*
+ * return infolist with haskell scripts.
+ */
+
+struct t_infolist *
+weechat_hs_infolist_cb (void *data, const char *infolist_name,
+                         void *pointer, const char *arguments)
+{
+    /* make C compiler happy */
+    (void) data;
+
+    if (!infolist_name || !infolist_name[0])
+        return NULL;
+
+    if (weechat_strcasecmp (infolist_name, "hs_script") == 0)
+    {
+        return plugin_script_infolist_list_scripts (weechat_plugin,
+                                                    hs_scripts, pointer,
+                                                    arguments);
+    }
+
+    return NULL;
+}
+
+/*
  * callback for buffer closed
  */
 
