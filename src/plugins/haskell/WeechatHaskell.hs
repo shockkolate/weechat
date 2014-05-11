@@ -23,12 +23,34 @@
 
 module WeechatHaskell where
 
-import Foreign.C.String (newCString)
+import Foreign.C.Types (CInt(..))
+import Foreign.C.String
 import Foreign.Ptr
+import Language.Haskell.Interpreter
 import API
 
 close :: CloseCB
 close dat buffer = return weechat_rc_ok
+
+foreign export ccall haskell_load :: CString -> IO CInt
+haskell_load cPath = do
+    path <- peekCString cPath
+    result <- runInterpreter $ do
+        loadModules [path]
+        moduleNames <- getLoadedModules
+        setTopLevelModules [(head moduleNames)]
+    case result of
+        Left (WontCompile errs) -> do
+            mapM_ f errs
+            return weechat_rc_error
+          where f err = do
+                    cErr <- newCString (errMsg err)
+                    weechat_print nullPtr cErr
+        Left e -> do
+            cE <- newCString (show e)
+            weechat_print nullPtr cE
+            return weechat_rc_error
+        Right _ -> return weechat_rc_ok
 
 foreign export ccall test_buffer_new :: IO ()
 test_buffer_new :: IO ()

@@ -107,10 +107,13 @@ weechat_hs_load (const char *filename)
                         weechat_prefix ("error"), TCL_PLUGIN_NAME);
         return 0;
     }
-    tcl_current_script_filename = filename;
+*/
+    hs_current_script_filename = filename;
 
+    return haskell_load ((char *)filename);
+
+/*
     weechat_tcl_api_init (interp);
-
     if (Tcl_EvalFile (interp, filename) != TCL_OK)
     {
         weechat_printf (NULL,
@@ -462,8 +465,8 @@ weechat_plugin_init (struct t_weechat_plugin *plugin, int argc, char *argv[])
     init.callback_completion = &weechat_hs_completion_cb;
 */
     init.callback_hdata = &weechat_hs_hdata_cb;
-/*
     init.callback_infolist = &weechat_hs_infolist_cb;
+/*
     init.callback_signal_debug_dump = &weechat_hs_signal_debug_dump_cb;
     init.callback_signal_debug_libs = &weechat_hs_signal_debug_libs_cb;
 */
