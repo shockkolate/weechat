@@ -82,6 +82,6 @@ weechat_hs_api_buffer_new (const char *name,
 {
     return plugin_script_api_buffer_new (weechat_plugin, hs_current_script,
                                          name,
-                                         input_callback, "", input_callback_data,
-                                         close_callback, "", close_callback_data);
+                                         input_callback, "-", input_callback_data,
+                                         close_callback, "-", close_callback_data);
 }
