@@ -30,8 +30,8 @@ import Language.Haskell.Interpreter
 import qualified API
 import qualified Weechat
 
-close :: Weechat.CloseCB
-close dat buffer = return Weechat.weechat_rc_ok
+--close :: Weechat.CloseCB
+close dat buf = return Weechat.weechat_rc_ok
 
 foreign export ccall haskell_load :: CString -> IO Weechat.RC
 haskell_load cPath = do
@@ -44,15 +44,15 @@ haskell_load cPath = do
         interpret "weechat_init" (as :: IO Weechat.RC)
     case result of
         Left (WontCompile errs) -> do
-            mapM_ (Weechat.print nullPtr . errMsg) errs
+            mapM_ (Weechat.print "" . errMsg) errs
             return Weechat.weechat_rc_error
         Left e -> do
-            Weechat.print nullPtr (show e)
+            Weechat.print "" (show e)
             return Weechat.weechat_rc_error
         Right cmp -> cmp >> return Weechat.weechat_rc_ok
 
 foreign export ccall test_buffer_new :: IO ()
 test_buffer_new :: IO ()
 test_buffer_new = do
-    buf <- Weechat.buffer_new "haskell" Nothing nullPtr (Just close) nullPtr
+    buf <- Weechat.buffer_new "haskell" Nothing "" (Just close) ""
     return ()

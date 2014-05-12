@@ -28,12 +28,10 @@ import Foreign.C.String
 import Foreign.Ptr
 
 type RC = CInt
-type DataPtr = Ptr ()
-type GuiBufferPtr = Ptr ()
 
 type ShutdownCB = IO RC
-type InputCB = Ptr () -> GuiBufferPtr -> CString -> IO RC
-type CloseCB = Ptr () -> GuiBufferPtr -> IO RC
+type InputCB = Ptr () -> Ptr () -> CString -> IO RC
+type CloseCB = Ptr () -> Ptr () -> IO RC
 
 foreign import ccall "wrapper" fromShutdownCB :: ShutdownCB -> IO (FunPtr ShutdownCB)
 foreign import ccall "wrapper" fromInputCB :: InputCB -> IO (FunPtr InputCB)
@@ -47,6 +45,7 @@ foreign import ccall "weechat_hs_api_register"
     plugin_register :: CString -> CString -> CString -> CString -> CString
                     -> FunPtr ShutdownCB -> CString -> IO RC
 foreign import ccall "weechat_hs_api_print"
-    plugin_print :: GuiBufferPtr -> CString -> IO ()
+    plugin_print :: Ptr () -> CString -> IO ()
 foreign import ccall "weechat_hs_api_buffer_new"
-    plugin_buffer_new :: CString -> FunPtr InputCB -> Ptr () -> FunPtr CloseCB -> Ptr () -> IO GuiBufferPtr
+    plugin_buffer_new :: CString -> FunPtr InputCB -> Ptr () -> FunPtr CloseCB
+                      -> Ptr () -> IO (Ptr ())

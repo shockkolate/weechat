@@ -19,9 +19,10 @@
  - along with WeeChat.  If not, see <http://www.gnu.org/licenses/>.
  -}
 
+{-# LANGUAGE FlexibleInstances #-}
+
 module Weechat
-( nullPtr
-, RC, DataPtr, GuiBufferPtr
+( RC
 , ShutdownCB, InputCB, CloseCB
 , weechat_rc_ok, weechat_rc_ok_eat, weechat_rc_error
 , register
@@ -34,16 +35,24 @@ import Foreign.Ptr
 import Foreign.StablePtr
 import qualified API
 
+class PtrRep a where
+    toPtr :: a -> Ptr ()
+    toRep :: Ptr () -> a
+instance PtrRep String where
+    toPtr "" = nullPtr
+    toPtr r = plusPtr nullPtr (read r)
+    toRep = show
+
 type RC = API.RC
-type DataPtr = API.DataPtr
-type GuiBufferPtr = API.GuiBufferPtr
 
 type ShutdownCB = API.ShutdownCB
-type InputCB = Ptr () -> GuiBufferPtr -> String -> IO RC
-type CloseCB = API.CloseCB
+type InputCB = String -> String -> String -> IO RC
+type CloseCB = String -> String -> IO RC
 
 wrapInputCB :: InputCB -> API.InputCB
-wrapInputCB f dat buf s = peekCString s >>= f dat buf
+wrapInputCB f dat buf s = peekCString s >>= f (toRep dat) (toRep buf)
+wrapCloseCB :: CloseCB -> API.CloseCB
+wrapCloseCB f dat buf = f (toRep dat) (toRep buf)
 
 weechat_rc_ok = API.weechat_rc_ok
 weechat_rc_ok_eat = API.weechat_rc_ok_eat
@@ -62,16 +71,18 @@ register name author version license desc mShutdownCB charset = do
     cCharset <- newCString charset
     API.plugin_register cName cAuthor cVersion cLicense cDesc fpShutdown cCharset
 
-print :: GuiBufferPtr -> String -> IO ()
-print buf s = withCString s (API.plugin_print buf)
+print :: PtrRep a => a -> String -> IO ()
+print buf s = withCString s (API.plugin_print (toPtr buf))
 
-buffer_new :: String -> Maybe InputCB -> Ptr () -> Maybe CloseCB -> Ptr () -> IO GuiBufferPtr
+buffer_new :: (PtrRep a0, PtrRep a1)
+           => String -> Maybe InputCB -> a0 -> Maybe CloseCB -> a1 -> IO String
 buffer_new name maybeInputCB inputData maybeCloseCB closeData = do
     cName <- newCString name
     fpInput <- case maybeInputCB of
         Just cb -> API.fromInputCB (wrapInputCB cb)
         Nothing -> return nullFunPtr
     fpClose <- case maybeCloseCB of
-        Just cb -> API.fromCloseCB cb
+        Just cb -> API.fromCloseCB (wrapCloseCB cb)
         Nothing -> return nullFunPtr
-    API.plugin_buffer_new cName fpInput inputData fpClose closeData
+    API.plugin_buffer_new cName fpInput (toPtr inputData) fpClose (toPtr closeData)
+        >>= return . toRep

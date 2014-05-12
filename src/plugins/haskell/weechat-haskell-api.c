@@ -60,6 +60,52 @@ weechat_hs_api_register (const char *name, const char *author,
                          const char *desc, const char *shutdown_func,
                          const char *charset)
 {
+    if (hs_registered_script)
+    {
+        /* script already registered */
+        weechat_printf (NULL,
+                        weechat_gettext ("%s%s: script \"%s\" already "
+                                         "registered (register ignored)"),
+                        weechat_prefix ("error"), HASKELL_PLUGIN_NAME,
+                        hs_registered_script->name);
+        return 0;
+    }
+    hs_current_script = NULL;
+    hs_registered_script = NULL;
+
+    if (plugin_script_search (weechat_plugin, hs_scripts, name))
+    {
+        /* another script already exists with same name */
+        weechat_printf (NULL,
+                        weechat_gettext ("%s%s: unable to register script "
+                                         "\"%s\" (another script already "
+                                         "exists with this name)"),
+                        weechat_prefix ("error"), HASKELL_PLUGIN_NAME, name);
+        return 0;
+    }
+
+    /* register script */
+    hs_current_script = plugin_script_add (weechat_plugin,
+                                           &hs_scripts, &last_hs_script,
+                                           (hs_current_script_filename) ?
+                                           hs_current_script_filename : "",
+                                           name, author, version, license,
+                                           desc, shutdown_func, charset);
+
+    if (!hs_current_script)
+    {
+        return 0;
+    }
+
+    hs_registered_script = hs_current_script;
+    if ((weechat_plugin->debug >= 2) || !hs_quiet)
+    {
+        weechat_printf (NULL,
+                        weechat_gettext ("%s: registered script \"%s\", "
+                                         "version %s (%s)"),
+                        HASKELL_PLUGIN_NAME, name, version, desc);
+    }
+
     return 0;
 }
 
