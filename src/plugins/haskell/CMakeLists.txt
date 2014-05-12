@@ -24,6 +24,7 @@ if(GHC_FOUND)
       WeechatHaskell.hs weechat-haskell.c weechat-haskell-api.c
       $<TARGET_LINKER_FILE:weechat_plugins_scripts>
       -lHSrts-ghc7.8.2
+    COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR} && cabal install --enable-shared
     DEPENDS WeechatHaskell.hs API.hs weechat-haskell.c weechat-haskell.h
             weechat-haskell-api.c
   )

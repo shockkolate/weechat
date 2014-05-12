@@ -33,13 +33,15 @@ import qualified Weechat
 close :: Weechat.CloseCB
 close dat buffer = return Weechat.weechat_rc_ok
 
-foreign export ccall haskell_load :: CString -> IO CInt
+foreign export ccall haskell_load :: CString -> IO Weechat.RC
 haskell_load cPath = do
     path <- peekCString cPath
     result <- runInterpreter $ do
         loadModules [path]
         moduleNames <- getLoadedModules
         setTopLevelModules [(head moduleNames)]
+        setImports ["Foreign.C.Types"]
+        interpret "weechat_init" (as :: IO Weechat.RC)
     case result of
         Left (WontCompile errs) -> do
             mapM_ (Weechat.print nullPtr . errMsg) errs
@@ -47,7 +49,7 @@ haskell_load cPath = do
         Left e -> do
             Weechat.print nullPtr (show e)
             return Weechat.weechat_rc_error
-        Right _ -> return Weechat.weechat_rc_ok
+        Right cmp -> cmp >> return Weechat.weechat_rc_ok
 
 foreign export ccall test_buffer_new :: IO ()
 test_buffer_new :: IO ()

@@ -28,17 +28,24 @@ import Foreign.C.String
 import Foreign.Ptr
 
 type RC = CInt
+type DataPtr = Ptr ()
 type GuiBufferPtr = Ptr ()
-type InputCB = Ptr () -> GuiBufferPtr -> CString -> IO CInt
-type CloseCB = Ptr () -> GuiBufferPtr -> IO CInt
 
+type ShutdownCB = IO RC
+type InputCB = Ptr () -> GuiBufferPtr -> CString -> IO RC
+type CloseCB = Ptr () -> GuiBufferPtr -> IO RC
+
+foreign import ccall "wrapper" fromShutdownCB :: ShutdownCB -> IO (FunPtr ShutdownCB)
 foreign import ccall "wrapper" fromInputCB :: InputCB -> IO (FunPtr InputCB)
 foreign import ccall "wrapper" fromCloseCB :: CloseCB -> IO (FunPtr CloseCB)
 
-foreign import ccall "weechat_hs_api_rc_ok" weechat_rc_ok :: CInt
-foreign import ccall "weechat_hs_api_rc_ok_eat" weechat_rc_ok_eat :: CInt
-foreign import ccall "weechat_hs_api_rc_error" weechat_rc_error :: CInt
+foreign import ccall "weechat_hs_api_rc_ok" weechat_rc_ok :: RC
+foreign import ccall "weechat_hs_api_rc_ok_eat" weechat_rc_ok_eat :: RC
+foreign import ccall "weechat_hs_api_rc_error" weechat_rc_error :: RC
 
+foreign import ccall "weechat_hs_api_register"
+    plugin_register :: CString -> CString -> CString -> CString -> CString
+                    -> FunPtr ShutdownCB -> CString -> IO RC
 foreign import ccall "weechat_hs_api_print"
     plugin_print :: GuiBufferPtr -> CString -> IO ()
 foreign import ccall "weechat_hs_api_buffer_new"

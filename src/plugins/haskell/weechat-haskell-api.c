@@ -54,6 +54,15 @@ weechat_hs_api_rc_error ()
     return WEECHAT_RC_ERROR;
 }
 
+int
+weechat_hs_api_register (const char *name, const char *author,
+                         const char *version, const char *license,
+                         const char *desc, const char *shutdown_func,
+                         const char *charset)
+{
+    return 0;
+}
+
 void
 weechat_hs_api_print (struct t_gui_buffer *buffer, const char *message)
 {

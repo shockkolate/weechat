@@ -1,5 +1,5 @@
 {-
- - API.hs - haskell foreign API functions
+ - Weechat.hs - haskell API functions
  -
  - Copyright (C) 2014 David Farrell (Shockk) <shokku.ra@gmail.com>
  -
@@ -19,17 +19,28 @@
  - along with WeeChat.  If not, see <http://www.gnu.org/licenses/>.
  -}
 
-module Weechat where
+module Weechat
+( nullPtr
+, RC, DataPtr, GuiBufferPtr
+, ShutdownCB, InputCB, CloseCB
+, weechat_rc_ok, weechat_rc_ok_eat, weechat_rc_error
+, register
+, Weechat.print
+, buffer_new
+) where
 
-import Foreign.C.Types (CInt(..))
 import Foreign.C.String
 import Foreign.Ptr
+import Foreign.StablePtr
 import qualified API
 
 type RC = API.RC
+type DataPtr = API.DataPtr
 type GuiBufferPtr = API.GuiBufferPtr
+
+type ShutdownCB = API.ShutdownCB
 type InputCB = Ptr () -> GuiBufferPtr -> String -> IO RC
-type CloseCB = Ptr () -> GuiBufferPtr -> IO RC
+type CloseCB = API.CloseCB
 
 wrapInputCB :: InputCB -> API.InputCB
 wrapInputCB f dat buf s = peekCString s >>= f dat buf
@@ -38,16 +49,29 @@ weechat_rc_ok = API.weechat_rc_ok
 weechat_rc_ok_eat = API.weechat_rc_ok_eat
 weechat_rc_error = API.weechat_rc_error
 
-print :: API.GuiBufferPtr -> String -> IO ()
+register :: String -> String -> String -> String -> String -> Maybe ShutdownCB -> String -> IO RC
+register name author version license desc mShutdownCB charset = do
+    cName <- newCString name
+    cAuthor <- newCString author
+    cVersion <- newCString version
+    cLicense <- newCString license
+    cDesc <- newCString desc
+    fpShutdown <- case mShutdownCB of
+        Just cb -> API.fromShutdownCB cb
+        Nothing -> return nullFunPtr
+    cCharset <- newCString charset
+    API.plugin_register cName cAuthor cVersion cLicense cDesc fpShutdown cCharset
+
+print :: GuiBufferPtr -> String -> IO ()
 print buf s = withCString s (API.plugin_print buf)
 
 buffer_new :: String -> Maybe InputCB -> Ptr () -> Maybe CloseCB -> Ptr () -> IO GuiBufferPtr
-buffer_new name mInputCB inputData mCloseCB closeData = do
+buffer_new name maybeInputCB inputData maybeCloseCB closeData = do
     cName <- newCString name
-    fpInput <- case mInputCB of
+    fpInput <- case maybeInputCB of
         Just cb -> API.fromInputCB (wrapInputCB cb)
         Nothing -> return nullFunPtr
-    fpClose <- case mCloseCB of
+    fpClose <- case maybeCloseCB of
         Just cb -> API.fromCloseCB cb
         Nothing -> return nullFunPtr
     API.plugin_buffer_new cName fpInput inputData fpClose closeData
