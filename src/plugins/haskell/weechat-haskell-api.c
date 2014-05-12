@@ -57,7 +57,8 @@ weechat_hs_api_rc_error ()
 void
 weechat_hs_api_print (struct t_gui_buffer *buffer, const char *message)
 {
-    weechat_printf (buffer, weechat_gettext ("%s"), message);
+    plugin_script_api_printf (weechat_plugin, hs_current_script,
+                              buffer, "%s", message);
 }
 
 struct t_gui_buffer *

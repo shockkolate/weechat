@@ -27,10 +27,11 @@ import Foreign.C.Types (CInt(..))
 import Foreign.C.String
 import Foreign.Ptr
 
+type RC = CInt
 type GuiBufferPtr = Ptr ()
-
 type InputCB = Ptr () -> GuiBufferPtr -> CString -> IO CInt
 type CloseCB = Ptr () -> GuiBufferPtr -> IO CInt
+
 foreign import ccall "wrapper" fromInputCB :: InputCB -> IO (FunPtr InputCB)
 foreign import ccall "wrapper" fromCloseCB :: CloseCB -> IO (FunPtr CloseCB)
 
@@ -39,6 +40,6 @@ foreign import ccall "weechat_hs_api_rc_ok_eat" weechat_rc_ok_eat :: CInt
 foreign import ccall "weechat_hs_api_rc_error" weechat_rc_error :: CInt
 
 foreign import ccall "weechat_hs_api_print"
-    weechat_print :: GuiBufferPtr -> CString -> IO ()
+    plugin_print :: GuiBufferPtr -> CString -> IO ()
 foreign import ccall "weechat_hs_api_buffer_new"
-    weechat_buffer_new :: CString -> FunPtr InputCB -> Ptr () -> FunPtr CloseCB -> Ptr () -> IO GuiBufferPtr
+    plugin_buffer_new :: CString -> FunPtr InputCB -> Ptr () -> FunPtr CloseCB -> Ptr () -> IO GuiBufferPtr

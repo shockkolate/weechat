@@ -27,10 +27,11 @@ import Foreign.C.Types (CInt(..))
 import Foreign.C.String
 import Foreign.Ptr
 import Language.Haskell.Interpreter
-import API
+import qualified API
+import qualified Weechat
 
-close :: CloseCB
-close dat buffer = return weechat_rc_ok
+close :: Weechat.CloseCB
+close dat buffer = return Weechat.weechat_rc_ok
 
 foreign export ccall haskell_load :: CString -> IO CInt
 haskell_load cPath = do
@@ -41,22 +42,15 @@ haskell_load cPath = do
         setTopLevelModules [(head moduleNames)]
     case result of
         Left (WontCompile errs) -> do
-            mapM_ f errs
-            return weechat_rc_error
-          where f err = do
-                    cErr <- newCString (errMsg err)
-                    weechat_print nullPtr cErr
+            mapM_ (Weechat.print nullPtr . errMsg) errs
+            return Weechat.weechat_rc_error
         Left e -> do
-            cE <- newCString (show e)
-            weechat_print nullPtr cE
-            return weechat_rc_error
-        Right _ -> return weechat_rc_ok
+            Weechat.print nullPtr (show e)
+            return Weechat.weechat_rc_error
+        Right _ -> return Weechat.weechat_rc_ok
 
 foreign export ccall test_buffer_new :: IO ()
 test_buffer_new :: IO ()
 test_buffer_new = do
-    cs <- newCString "haskell"
-    fpClose <- fromCloseCB close
-    buf <- weechat_buffer_new cs nullFunPtr nullPtr fpClose nullPtr
-    --weechat_print buf cs
+    buf <- Weechat.buffer_new "haskell" Nothing nullPtr (Just close) nullPtr
     return ()
