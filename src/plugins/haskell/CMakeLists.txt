@@ -20,7 +20,7 @@
 if(GHC_FOUND)
   add_custom_target(haskell ALL
     COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR} &&
-      ghc -O2 -dynamic -shared -fPIC -o ${CMAKE_CURRENT_BINARY_DIR}/haskell.so
+      ghc -Wall -O2 -dynamic -shared -fPIC -o ${CMAKE_CURRENT_BINARY_DIR}/haskell.so
       WeechatHaskell.hs weechat-haskell.c weechat-haskell-api.c
       $<TARGET_LINKER_FILE:weechat_plugins_scripts>
       -lHSrts-ghc7.8.2
