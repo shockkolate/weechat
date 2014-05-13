@@ -27,10 +27,11 @@ module Weechat
 , weechat_rc_ok, weechat_rc_ok_eat, weechat_rc_error
 , register
 , plugin_get_name
-, Weechat.print
+, print
 , buffer_new
 ) where
 
+import Prelude hiding (print)
 import Foreign.C.String
 import Foreign.Ptr
 import qualified API
