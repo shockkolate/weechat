@@ -46,6 +46,30 @@ struct t_plugin_script *hs_registered_script = NULL;
 const char *hs_current_script_filename = NULL;
 
 /*
+ * string used to execute action "install":
+ * when signal "hs_script_install" is received, name of string
+ * is added to this string, to be installed later by a timer (when nothing is
+ * running in script)
+ */
+char *hs_action_install_list = NULL;
+
+/*
+ * string used to execute action "remove":
+ * when signal "hs_script_remove" is received, name of string
+ * is added to this string, to be removed later by a timer (when nothing is
+ * running in script)
+ */
+char *hs_action_remove_list = NULL;
+
+/*
+ * string used to execute action "autoload":
+ * when signal "hs_script_autoload" is received, name of string
+ * is added to this string, to autoload or disable autoload later by a timer
+ * (when nothing is running in script)
+ */
+char *hs_action_autoload_list = NULL;
+
+/*
  * execute a haskell function
  */
 
@@ -67,7 +91,7 @@ weechat_hs_exec (struct t_plugin_script *script,
 }
 
 /*
- * load a haskell script.
+ * load a haskell script
  *
  * Returns:
  *   1: OK
@@ -97,19 +121,9 @@ weechat_hs_load (const char *filename)
 
     hs_current_script = NULL;
     hs_registered_script = NULL;
-
-/*
-    if (!(interp = Tcl_CreateInterp ())) {
-        weechat_printf (NULL,
-                        weechat_gettext ("%s%s: unable to create new "
-                                         "interpreter"),
-                        weechat_prefix ("error"), TCL_PLUGIN_NAME);
-        return 0;
-    }
-*/
     hs_current_script_filename = filename;
 
-    return haskell_load ((char *)filename);
+    return haskell_load ((char *) filename);
 
 /*
     weechat_tcl_api_init (interp);
@@ -380,6 +394,25 @@ weechat_hs_command_cb (void *data, struct t_gui_buffer *buffer,
 }
 
 /*
+ * add haskell scripts to completion list
+ */
+
+int
+weechat_hs_completion_cb (void *data, const char *completion_item,
+                          struct t_gui_buffer *buffer,
+                          struct t_gui_completion *completion)
+{
+    /* make C compiler happy */
+    (void) data;
+    (void) completion_item;
+    (void) buffer;
+
+    plugin_script_completion (weechat_plugin, completion, hs_scripts);
+
+    return WEECHAT_RC_OK;
+}
+
+/*
  * return hdata for haskell scripts
  */
 
@@ -395,7 +428,7 @@ weechat_hs_hdata_cb (void *data, const char *hdata_name)
 }
 
 /*
- * return infolist with haskell scripts.
+ * return infolist with haskell scripts
  */
 
 struct t_infolist *
@@ -419,7 +452,7 @@ weechat_hs_infolist_cb (void *data, const char *infolist_name,
 }
 
 /*
- * dump haskell plugin data in WeeChat log file.
+ * dump haskell plugin data in WeeChat log file
  */
 
 int
@@ -441,7 +474,7 @@ weechat_hs_signal_debug_dump_cb (void *data, const char *signal,
 }
 
 /*
- * display info about external libraries used.
+ * display info about external libraries used
  */
 
 int
@@ -483,6 +516,89 @@ weechat_hs_signal_buffer_closed_cb (void *data, const char *signal,
 }
 
 /*
+ * timer for executing actions
+ */
+
+int
+weechat_hs_timer_action_cb (void *data, int remaining_calls)
+{
+    /* make C compiler happy */
+    (void) remaining_calls;
+
+    if (data)
+    {
+        if (data == &hs_action_install_list)
+        {
+            plugin_script_action_install (weechat_plugin,
+                                          hs_scripts,
+                                          &weechat_hs_unload,
+                                          &weechat_hs_load,
+                                          &hs_quiet,
+                                          &hs_action_install_list);
+        }
+        else if (data == &hs_action_remove_list)
+        {
+            plugin_script_action_remove (weechat_plugin,
+                                         hs_scripts,
+                                         &weechat_hs_unload,
+                                         &hs_quiet,
+                                         &hs_action_remove_list);
+        }
+        else if (data == &hs_action_autoload_list)
+        {
+            plugin_script_action_autoload (weechat_plugin,
+                                           &hs_quiet,
+                                           &hs_action_autoload_list);
+        }
+    }
+
+    return WEECHAT_RC_OK;
+}
+
+/*
+ * callback for script actions (install/remove a script)
+ */
+
+int
+weechat_hs_signal_script_action_cb (void *data, const char *signal,
+                                    const char *type_data,
+                                    void *signal_data)
+{
+    /* make C compiler happy */
+    (void) data;
+
+    if (strcmp (type_data, WEECHAT_HOOK_SIGNAL_STRING) == 0)
+    {
+        if (strcmp (signal, "hs_script_install") == 0)
+        {
+            plugin_script_action_add (&hs_action_install_list,
+                                      (const char *)signal_data);
+            weechat_hook_timer (1, 0, 1,
+                                &weechat_hs_timer_action_cb,
+                                &hs_action_install_list);
+        }
+        else if (strcmp (signal, "hs_script_remove") == 0)
+        {
+            plugin_script_action_add (&hs_action_remove_list,
+                                      (const char *)signal_data);
+            weechat_hook_timer (1, 0, 1,
+                                &weechat_hs_timer_action_cb,
+                                &hs_action_remove_list);
+        }
+        else if (strcmp (signal, "hs_script_autoload") == 0)
+        {
+            plugin_script_action_add (&hs_action_autoload_list,
+                                      (const char *)signal_data);
+            weechat_hook_timer (1, 0, 1,
+                                &weechat_hs_timer_action_cb,
+                                &hs_action_autoload_list);
+        }
+    }
+
+    return WEECHAT_RC_OK;
+}
+
+/*
  * initialize haskell plugin
  */
 
@@ -497,17 +613,13 @@ weechat_plugin_init (struct t_weechat_plugin *plugin, int argc, char *argv[])
     hs_add_root (__stginit_WeechatHaskell);
 
     init.callback_command = &weechat_hs_command_cb;
-/*
     init.callback_completion = &weechat_hs_completion_cb;
-*/
     init.callback_hdata = &weechat_hs_hdata_cb;
     init.callback_infolist = &weechat_hs_infolist_cb;
     init.callback_signal_debug_dump = &weechat_hs_signal_debug_dump_cb;
     init.callback_signal_debug_libs = &weechat_hs_signal_debug_libs_cb;
     init.callback_signal_buffer_closed = &weechat_hs_signal_buffer_closed_cb;
-/*
     init.callback_signal_script_action = &weechat_hs_signal_script_action_cb;
-*/
     init.callback_load_file = &weechat_hs_load_cb;
 
     hs_quiet = 1;
@@ -529,6 +641,14 @@ weechat_plugin_end (struct t_weechat_plugin *plugin)
     hs_quiet = 1;
     plugin_script_end (plugin, &hs_scripts, &weechat_hs_unload_all);
     hs_quiet = 0;
+
+    /* free some data */
+    if (hs_action_install_list)
+        free (hs_action_install_list);
+    if (hs_action_remove_list)
+        free (hs_action_remove_list);
+    if (hs_action_autoload_list)
+        free (hs_action_autoload_list);
 
     hs_exit ();
 
