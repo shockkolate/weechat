@@ -32,10 +32,12 @@ type RC = CInt
 type ShutdownCB = IO RC
 type InputCB = Ptr () -> Ptr () -> CString -> IO RC
 type CloseCB = Ptr () -> Ptr () -> IO RC
+type BuildCB = Ptr () -> Ptr () -> Ptr () -> Ptr () -> Ptr () -> IO CString
 
 foreign import ccall "wrapper" fromShutdownCB :: ShutdownCB -> IO (FunPtr ShutdownCB)
 foreign import ccall "wrapper" fromInputCB :: InputCB -> IO (FunPtr InputCB)
 foreign import ccall "wrapper" fromCloseCB :: CloseCB -> IO (FunPtr CloseCB)
+foreign import ccall "wrapper" fromBuildCB :: BuildCB -> IO (FunPtr BuildCB)
 
 foreign import ccall "weechat_hs_api_rc_ok" weechat_rc_ok :: RC
 foreign import ccall "weechat_hs_api_rc_ok_eat" weechat_rc_ok_eat :: RC
@@ -53,3 +55,5 @@ foreign import ccall "weechat_hs_api_print"
 foreign import ccall "weechat_hs_api_buffer_new"
     plugin_buffer_new :: CString -> FunPtr InputCB -> Ptr () -> FunPtr CloseCB
                       -> Ptr () -> IO (Ptr ())
+foreign import ccall "weechat_hs_api_bar_item_new"
+    plugin_bar_item_new :: CString -> FunPtr BuildCB -> Ptr () -> IO (Ptr ())

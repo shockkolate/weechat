@@ -30,6 +30,7 @@ module Weechat
 , charset_set
 , print
 , buffer_new
+, bar_item_new
 ) where
 
 import Prelude hiding (print)
@@ -51,11 +52,15 @@ type RC = API.RC
 type ShutdownCB = IO RC
 type InputCB = String -> String -> String -> IO RC
 type CloseCB = String -> String -> IO RC
+type BuildCB = String -> String -> String -> String -> String -> IO String
 
 wrapInputCB :: InputCB -> API.InputCB
 wrapInputCB f dat buf s = peekCString s >>= f (toRep dat) (toRep buf)
 wrapCloseCB :: CloseCB -> API.CloseCB
 wrapCloseCB f dat buf = f (toRep dat) (toRep buf)
+wrapBuildCB :: BuildCB -> API.BuildCB
+wrapBuildCB f a b c d e = f (toRep a) (toRep b) (toRep c) (toRep d) (toRep e)
+    >>= newCString
 
 weechat_rc_ok :: RC
 weechat_rc_ok = API.weechat_rc_ok
@@ -98,3 +103,11 @@ buffer_new name maybeInputCB inputData maybeCloseCB closeData = do
         Nothing -> return nullFunPtr
     API.plugin_buffer_new cName fpInput (toPtr inputData) fpClose (toPtr closeData)
         >>= return . toRep
+
+bar_item_new :: (PtrRep a) => String -> Maybe BuildCB -> a -> IO String
+bar_item_new name maybeBuildCB buildData = do
+    cName <- newCString name
+    fpBuild <- case maybeBuildCB of
+        Just cb -> API.fromBuildCB (wrapBuildCB cb)
+        Nothing -> return nullFunPtr
+    API.plugin_bar_item_new cName fpBuild (toPtr buildData) >>= return . toRep

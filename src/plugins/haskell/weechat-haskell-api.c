@@ -145,3 +145,17 @@ weechat_hs_api_buffer_new (const char *name,
                                          input_callback, "-", input_callback_data,
                                          close_callback, "-", close_callback_data);
 }
+
+struct t_gui_bar_item *
+weechat_hs_api_bar_item_new (const char *name,
+                             char *(*build_callback)(void *data,
+                                                     struct t_gui_bar_item *item,
+                                                     struct t_gui_window *window,
+                                                     struct t_gui_buffer *buffer,
+                                                     struct t_hashtable *extra),
+                             void *build_callback_data)
+{
+    return plugin_script_api_bar_item_new (weechat_plugin, hs_current_script,
+                                           name, build_callback, "",
+                                           build_callback_data);
+}
