@@ -109,6 +109,12 @@ weechat_hs_api_register (const char *name, const char *author,
     return 0;
 }
 
+const char *
+weechat_hs_api_plugin_get_name (void *plugin)
+{
+    return weechat_plugin_get_name (plugin);
+}
+
 void
 weechat_hs_api_print (struct t_gui_buffer *buffer, const char *message)
 {

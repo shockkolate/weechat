@@ -25,12 +25,11 @@ module WeechatHaskell where
 
 import Foreign.C.Types (CInt(..))
 import Foreign.C.String
-import Foreign.Ptr
 import Language.Haskell.Interpreter
-import qualified API
 import qualified Weechat
 
 foreign export ccall haskell_load :: CString -> IO Weechat.RC
+haskell_load :: CString -> IO Weechat.RC
 haskell_load cPath = do
     path <- peekCString cPath
     result <- runInterpreter $ do

@@ -26,13 +26,13 @@ module Weechat
 , RC, ShutdownCB, InputCB, CloseCB
 , weechat_rc_ok, weechat_rc_ok_eat, weechat_rc_error
 , register
+, plugin_get_name
 , Weechat.print
 , buffer_new
 ) where
 
 import Foreign.C.String
 import Foreign.Ptr
-import Foreign.StablePtr
 import qualified API
 
 class PtrRep a where
@@ -54,8 +54,11 @@ wrapInputCB f dat buf s = peekCString s >>= f (toRep dat) (toRep buf)
 wrapCloseCB :: CloseCB -> API.CloseCB
 wrapCloseCB f dat buf = f (toRep dat) (toRep buf)
 
+weechat_rc_ok :: RC
 weechat_rc_ok = API.weechat_rc_ok
+weechat_rc_ok_eat :: RC
 weechat_rc_ok_eat = API.weechat_rc_ok_eat
+weechat_rc_error :: RC
 weechat_rc_error = API.weechat_rc_error
 
 register :: String -> String -> String -> String -> String -> Maybe ShutdownCB -> String -> IO RC
@@ -70,6 +73,9 @@ register name author version license desc mShutdownCB charset = do
         Nothing -> return nullFunPtr
     cCharset <- newCString charset
     API.plugin_register cName cAuthor cVersion cLicense cDesc fpShutdown cCharset
+
+plugin_get_name :: PtrRep a => a -> IO String
+plugin_get_name p = API.plugin_plugin_get_name (toPtr p) >>= peekCString
 
 print :: PtrRep a => a -> String -> IO ()
 print buf s = withCString s (API.plugin_print (toPtr buf))

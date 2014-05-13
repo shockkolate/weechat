@@ -44,6 +44,8 @@ foreign import ccall "weechat_hs_api_rc_error" weechat_rc_error :: RC
 foreign import ccall "weechat_hs_api_register"
     plugin_register :: CString -> CString -> CString -> CString -> CString
                     -> FunPtr ShutdownCB -> CString -> IO RC
+foreign import ccall "weechat_hs_api_plugin_get_name"
+    plugin_plugin_get_name :: Ptr () -> IO CString
 foreign import ccall "weechat_hs_api_print"
     plugin_print :: Ptr () -> CString -> IO ()
 foreign import ccall "weechat_hs_api_buffer_new"
