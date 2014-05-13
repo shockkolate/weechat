@@ -78,7 +78,6 @@ int
 weechat_hs_load (const char *filename)
 {
     int i;
-    //Tcl_Interp *interp;
     struct stat buf;
 
     if (stat (filename, &buf) != 0)
@@ -96,7 +95,7 @@ weechat_hs_load (const char *filename)
                         HASKELL_PLUGIN_NAME, filename);
     }
 
-    //hs_current_script = NULL;
+    hs_current_script = NULL;
     hs_registered_script = NULL;
 
 /*

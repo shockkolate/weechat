@@ -22,8 +22,8 @@
 {-# LANGUAGE FlexibleInstances #-}
 
 module Weechat
-( RC
-, ShutdownCB, InputCB, CloseCB
+( PtrRep, toPtr, toRep
+, RC, ShutdownCB, InputCB, CloseCB
 , weechat_rc_ok, weechat_rc_ok_eat, weechat_rc_error
 , register
 , Weechat.print
@@ -45,7 +45,7 @@ instance PtrRep String where
 
 type RC = API.RC
 
-type ShutdownCB = API.ShutdownCB
+type ShutdownCB = IO RC
 type InputCB = String -> String -> String -> IO RC
 type CloseCB = String -> String -> IO RC
 
