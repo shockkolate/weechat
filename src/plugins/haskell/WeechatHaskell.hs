@@ -30,9 +30,6 @@ import Language.Haskell.Interpreter
 import qualified API
 import qualified Weechat
 
---close :: Weechat.CloseCB
-close dat buf = return Weechat.weechat_rc_ok
-
 foreign export ccall haskell_load :: CString -> IO Weechat.RC
 haskell_load cPath = do
     path <- peekCString cPath
@@ -50,9 +47,3 @@ haskell_load cPath = do
             Weechat.print "" (show e)
             return Weechat.weechat_rc_error
         Right cmp -> cmp >> return Weechat.weechat_rc_ok
-
-foreign export ccall test_buffer_new :: IO ()
-test_buffer_new :: IO ()
-test_buffer_new = do
-    buf <- Weechat.buffer_new "haskell" Nothing "" (Just close) ""
-    return ()

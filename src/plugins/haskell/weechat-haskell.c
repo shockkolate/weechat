@@ -451,14 +451,6 @@ weechat_plugin_init (struct t_weechat_plugin *plugin, int argc, char *argv[])
     hs_init (0, NULL);
     hs_add_root (__stginit_WeechatHaskell);
 
-    hs_current_script = plugin_script_add (weechat_plugin,
-                                        &hs_scripts,
-                                        &last_hs_script,
-                                        "", "haskell", "author",
-                                        "0.1", "GPL3", "desc", "", "");
-
-    test_buffer_new ();
-
     init.callback_command = &weechat_hs_command_cb;
 /*
     init.callback_completion = &weechat_hs_completion_cb;
