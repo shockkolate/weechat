@@ -57,3 +57,8 @@ foreign import ccall "weechat_hs_api_buffer_new"
                       -> Ptr () -> IO (Ptr ())
 foreign import ccall "weechat_hs_api_bar_item_new"
     plugin_bar_item_new :: CString -> FunPtr BuildCB -> Ptr () -> IO (Ptr ())
+foreign import ccall "weechat_hs_api_bar_new"
+    plugin_bar_new :: CString -> CString -> CString -> CString -> CString
+                   -> CString -> CString -> CString -> CString -> CString
+                   -> CString -> CString -> CString -> CString -> CString
+                   -> IO (Ptr ())

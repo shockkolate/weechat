@@ -159,3 +159,19 @@ weechat_hs_api_bar_item_new (const char *name,
                                            name, build_callback, "",
                                            build_callback_data);
 }
+
+struct t_gui_bar *
+weechat_hs_api_bar_new (const char *name, const char *hidden,
+                        const char *priority, const char *type,
+                        const char *condition, const char *position,
+                        const char *filling_top_bottom,
+                        const char *filling_left_right, const char *size,
+                        const char *size_max, const char *color_fg,
+                        const char *color_delim, const char *color_bg,
+                        const char *separator, const char *items)
+{
+    return weechat_bar_new (name, hidden, priority, type, condition, position,
+                            filling_top_bottom, filling_left_right, size,
+                            size_max, color_fg, color_delim, color_bg, separator,
+                            items);
+}

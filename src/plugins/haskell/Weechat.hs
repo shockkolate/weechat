@@ -23,7 +23,7 @@
 
 module Weechat
 ( PtrRep, toPtr, toRep
-, RC, ShutdownCB, InputCB, CloseCB
+, RC, ShutdownCB, InputCB, CloseCB, BuildCB
 , weechat_rc_ok, weechat_rc_ok_eat, weechat_rc_error
 , register
 , plugin_get_name
@@ -31,6 +31,7 @@ module Weechat
 , print
 , buffer_new
 , bar_item_new
+, bar_new
 ) where
 
 import Prelude hiding (print)
@@ -111,3 +112,25 @@ bar_item_new name maybeBuildCB buildData = do
         Just cb -> API.fromBuildCB (wrapBuildCB cb)
         Nothing -> return nullFunPtr
     API.plugin_bar_item_new cName fpBuild (toPtr buildData) >>= return . toRep
+
+bar_new :: String -> String -> String -> String -> String -> String -> String
+        -> String -> String -> String -> String -> String -> String -> String
+        -> String -> IO String
+bar_new x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15 = do
+    c1 <- newCString x1
+    c2 <- newCString x2
+    c3 <- newCString x3
+    c4 <- newCString x4
+    c5 <- newCString x5
+    c6 <- newCString x6
+    c7 <- newCString x7
+    c8 <- newCString x8
+    c9 <- newCString x9
+    c10 <- newCString x10
+    c11 <- newCString x11
+    c12 <- newCString x12
+    c13 <- newCString x13
+    c14 <- newCString x14
+    c15 <- newCString x15
+    API.plugin_bar_new c1 c2 c3 c4 c5 c6 c7 c8 c9 c10 c11 c12 c13 c14 c15
+        >>= return . toRep
