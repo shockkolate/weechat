@@ -123,46 +123,33 @@ weechat_hs_load (const char *filename)
     hs_registered_script = NULL;
     hs_current_script_filename = filename;
 
-    return haskell_load ((char *) filename);
+    haskell_load ((char *) filename);
 
-/*
-    weechat_tcl_api_init (interp);
-    if (Tcl_EvalFile (interp, filename) != TCL_OK)
-    {
-        weechat_printf (NULL,
-                        weechat_gettext ("%s%s: error occurred while "
-                                         "parsing file \"%s\": %s"),
-                        weechat_prefix ("error"), TCL_PLUGIN_NAME, filename,
-                        Tcl_GetStringFromObj (Tcl_GetObjResult (interp), &i));
-        /* this OK, maybe "register" was called, so not return */
-        /* return 0; *//*
-    }
-
-    if (!tcl_registered_script)
+    if (!hs_registered_script)
     {
         weechat_printf (NULL,
                         weechat_gettext ("%s%s: function \"register\" not "
                                          "found (or failed) in file \"%s\""),
-                        weechat_prefix ("error"), TCL_PLUGIN_NAME, filename);
-        Tcl_DeleteInterp (interp);
+                        weechat_prefix ("error"), HASKELL_PLUGIN_NAME, filename);
         return 0;
     }
-    tcl_current_script = tcl_registered_script;
+    hs_current_script = hs_registered_script;
 
     /*
      * set input/close callbacks for buffers created by this script
      * (to restore callbacks after upgrade)
-     *//*
+     */
+/*
     plugin_script_set_buffer_callbacks (weechat_tcl_plugin,
                                         tcl_scripts,
                                         tcl_current_script,
                                         &weechat_tcl_api_buffer_input_data_cb,
                                         &weechat_tcl_api_buffer_close_cb);
-
-    (void) weechat_hook_signal_send ("tcl_script_loaded",
-                                     WEECHAT_HOOK_SIGNAL_STRING,
-                                     tcl_current_script->filename);
 */
+
+    (void) weechat_hook_signal_send ("hs_script_loaded",
+                                     WEECHAT_HOOK_SIGNAL_STRING,
+                                     hs_current_script->filename);
     return 1;
 }
 
