@@ -285,7 +285,7 @@ weechat_hs_reload_name (const char *name)
 
 int
 weechat_hs_command_cb (void *data, struct t_gui_buffer *buffer,
-                         int argc, char **argv, char **argv_eol)
+                       int argc, char **argv, char **argv_eol)
 {
     char *ptr_name, *path_script;
 
@@ -400,7 +400,7 @@ weechat_hs_hdata_cb (void *data, const char *hdata_name)
 
 struct t_infolist *
 weechat_hs_infolist_cb (void *data, const char *infolist_name,
-                         void *pointer, const char *arguments)
+                        void *pointer, const char *arguments)
 {
     /* make C compiler happy */
     (void) data;
@@ -419,12 +419,57 @@ weechat_hs_infolist_cb (void *data, const char *infolist_name,
 }
 
 /*
+ * dump haskell plugin data in WeeChat log file.
+ */
+
+int
+weechat_hs_signal_debug_dump_cb (void *data, const char *signal,
+                                 const char *type_data, void *signal_data)
+{
+    /* make C compiler happy */
+    (void) data;
+    (void) signal;
+    (void) type_data;
+
+    if (!signal_data
+        || (weechat_strcasecmp ((char *)signal_data, HASKELL_PLUGIN_NAME) == 0))
+    {
+        plugin_script_print_log (weechat_plugin, hs_scripts);
+    }
+
+    return WEECHAT_RC_OK;
+}
+
+/*
+ * display info about external libraries used.
+ */
+
+int
+weechat_hs_signal_debug_libs_cb (void *data, const char *signal,
+                                 const char *type_data, void *signal_data)
+{
+    /* make C compiler happy */
+    (void) data;
+    (void) signal;
+    (void) type_data;
+    (void) signal_data;
+
+#ifdef HASKELL_VERSION
+    weechat_printf (NULL, "  %s: %s", HASKELL_PLUGIN_NAME, TCL_VERSION);
+#else
+    weechat_printf (NULL, "  %s: (?)", HASKELL_PLUGIN_NAME);
+#endif
+
+    return WEECHAT_RC_OK;
+}
+
+/*
  * callback for buffer closed
  */
 
 int
 weechat_hs_signal_buffer_closed_cb (void *data, const char *signal,
-                                     const char *type_data, void *signal_data)
+                                    const char *type_data, void *signal_data)
 {
     /* make C compiler happy */
     (void) data;
@@ -457,10 +502,8 @@ weechat_plugin_init (struct t_weechat_plugin *plugin, int argc, char *argv[])
 */
     init.callback_hdata = &weechat_hs_hdata_cb;
     init.callback_infolist = &weechat_hs_infolist_cb;
-/*
     init.callback_signal_debug_dump = &weechat_hs_signal_debug_dump_cb;
     init.callback_signal_debug_libs = &weechat_hs_signal_debug_libs_cb;
-*/
     init.callback_signal_buffer_closed = &weechat_hs_signal_buffer_closed_cb;
 /*
     init.callback_signal_script_action = &weechat_hs_signal_script_action_cb;

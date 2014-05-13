@@ -40,9 +40,9 @@ haskell_load cPath = do
         interpret "weechat_init" (as :: IO Weechat.RC)
     case result of
         Left (WontCompile errs) -> do
-            mapM_ (Weechat.print "" . errMsg) errs
+            _ <- mapM (Weechat.print "" . errMsg) errs
             return Weechat.weechat_rc_error
         Left e -> do
-            Weechat.print "" (show e)
+            _ <- Weechat.print "" (show e)
             return Weechat.weechat_rc_error
         Right cmp -> cmp >> return Weechat.weechat_rc_ok

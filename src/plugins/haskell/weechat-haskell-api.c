@@ -106,7 +106,7 @@ weechat_hs_api_register (const char *name, const char *author,
                         HASKELL_PLUGIN_NAME, name, version, desc);
     }
 
-    return 0;
+    return 1;
 }
 
 const char *
@@ -115,11 +115,19 @@ weechat_hs_api_plugin_get_name (void *plugin)
     return weechat_plugin_get_name (plugin);
 }
 
-void
+int
+weechat_hs_api_charset_set (const char *charset)
+{
+    plugin_script_api_charset_set (hs_current_script, charset);
+    return WEECHAT_RC_OK;
+}
+
+int
 weechat_hs_api_print (struct t_gui_buffer *buffer, const char *message)
 {
     plugin_script_api_printf (weechat_plugin, hs_current_script,
                               buffer, "%s", message);
+    return WEECHAT_RC_OK;
 }
 
 struct t_gui_buffer *

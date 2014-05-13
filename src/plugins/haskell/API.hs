@@ -43,11 +43,13 @@ foreign import ccall "weechat_hs_api_rc_error" weechat_rc_error :: RC
 
 foreign import ccall "weechat_hs_api_register"
     plugin_register :: CString -> CString -> CString -> CString -> CString
-                    -> FunPtr ShutdownCB -> CString -> IO RC
+                    -> FunPtr ShutdownCB -> CString -> IO CInt
 foreign import ccall "weechat_hs_api_plugin_get_name"
     plugin_plugin_get_name :: Ptr () -> IO CString
+foreign import ccall "weechat_hs_api_charset_set"
+    plugin_charset_set :: CString -> IO RC
 foreign import ccall "weechat_hs_api_print"
-    plugin_print :: Ptr () -> CString -> IO ()
+    plugin_print :: Ptr () -> CString -> IO RC
 foreign import ccall "weechat_hs_api_buffer_new"
     plugin_buffer_new :: CString -> FunPtr InputCB -> Ptr () -> FunPtr CloseCB
                       -> Ptr () -> IO (Ptr ())

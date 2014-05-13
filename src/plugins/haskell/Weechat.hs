@@ -27,11 +27,13 @@ module Weechat
 , weechat_rc_ok, weechat_rc_ok_eat, weechat_rc_error
 , register
 , plugin_get_name
+, charset_set
 , print
 , buffer_new
 ) where
 
 import Prelude hiding (print)
+import Foreign.C.Types (CInt(..))
 import Foreign.C.String
 import Foreign.Ptr
 import qualified API
@@ -62,7 +64,7 @@ weechat_rc_ok_eat = API.weechat_rc_ok_eat
 weechat_rc_error :: RC
 weechat_rc_error = API.weechat_rc_error
 
-register :: String -> String -> String -> String -> String -> Maybe ShutdownCB -> String -> IO RC
+register :: String -> String -> String -> String -> String -> Maybe ShutdownCB -> String -> IO CInt
 register name author version license desc mShutdownCB charset = do
     cName <- newCString name
     cAuthor <- newCString author
@@ -78,7 +80,10 @@ register name author version license desc mShutdownCB charset = do
 plugin_get_name :: PtrRep a => a -> IO String
 plugin_get_name p = API.plugin_plugin_get_name (toPtr p) >>= peekCString
 
-print :: PtrRep a => a -> String -> IO ()
+charset_set :: String -> IO RC
+charset_set s = newCString s >>= API.plugin_charset_set
+
+print :: PtrRep a => a -> String -> IO RC
 print buf s = withCString s (API.plugin_print (toPtr buf))
 
 buffer_new :: (PtrRep a0, PtrRep a1)
